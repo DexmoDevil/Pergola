@@ -18,13 +18,13 @@ const recibirDatos = async (req, res) => {
     }
 
     const nuevoDato = new SensorData({
-      temperatura: parseFloat(temperatura),
-      humedad: 0, // valor por defecto
-      co2: parseFloat(co2),
-      ph: parseFloat(ph),
-      timestamp: timestamp ? new Date(timestamp) : new Date(),
-      dispositivo: dispositivo || 'ESP32-001'
-    });
+    temperatura: Number(temperatura),
+    humedad: Number(humedad ?? 0),
+    co2: Number(co2),
+    ph: Number(ph),
+    timestamp: timestamp ? new Date(timestamp) : new Date(),
+    dispositivo: dispositivo || 'ESP32-001'
+  });
 
     await nuevoDato.save();
 
