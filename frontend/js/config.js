@@ -1,7 +1,7 @@
 // ─── CONFIGURACIÓN FRONTEND ─────────────────────────────────────
 // ⚠️ Cambia API_BASE_URL a la URL de tu backend en producción (Render)
 window.PERGOLA_CONFIG = {
-  API_BASE_URL: '', // Vacío = mismo servidor; en prod: 'https://tu-backend.onrender.com'
+  API_BASE_URL: 'https://pergola-s7bh.onrender.com', // Vacío = mismo servidor; en prod: 'https://tu-backend.onrender.com'
   POLL_INTERVAL_MS: 3000,
   HISTORY_POINTS: 30,
   DISCONNECTED_TIMEOUT_MS: 15000,
