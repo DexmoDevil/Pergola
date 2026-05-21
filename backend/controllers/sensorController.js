@@ -25,7 +25,7 @@ const recibirDatos = async (req, res) => {
     timestamp: timestamp ? new Date(timestamp) : new Date(),
     dispositivo: dispositivo || 'ESP32-001'
   });
-
+console.log("DATOS RECIBIDOS:", req.body);
     await nuevoDato.save();
 
     // Actualizar estado en memoria
