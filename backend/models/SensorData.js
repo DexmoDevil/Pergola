@@ -9,9 +9,7 @@ const sensorDataSchema = new mongoose.Schema({
   },
   humedad: {
     type: Number,
-    default: 0,
-    min: 0,
-    max: 100
+    default: null
   },
   co2: {
     type: Number,
