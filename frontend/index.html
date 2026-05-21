@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pérgola Inteligente · Monitor IoT</title>
+
+<!-- Fuentes -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- Leaflet Maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">⬡</div>
+    <div class="logo-text">
+      <span class="logo-main">Pérgola</span>
+      <span class="logo-sub">IoT Monitor</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#dashboard" class="nav-item active" data-section="dashboard">
+      <span class="nav-icon">◈</span>
+      <span>Dashboard</span>
+    </a>
+    <a href="#graficas" class="nav-item" data-section="graficas">
+      <span class="nav-icon">◉</span>
+      <span>Gráficas</span>
+    </a>
+    <a href="#calculadora" class="nav-item" data-section="calculadora">
+      <span class="nav-icon">◆</span>
+      <span>Calculadora</span>
+    </a>
+    <a href="#vista3d" class="nav-item" data-section="vista3d">
+      <span class="nav-icon">◬</span>
+      <span>Vista 3D</span>
+    </a>
+    <a href="#mapa" class="nav-item" data-section="mapa">
+      <span class="nav-icon">◎</span>
+      <span>Ubicación</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-status">
+    <div class="status-dot" id="statusDot"></div>
+    <div class="status-info">
+      <span class="status-label" id="statusLabel">Verificando...</span>
+      <span class="status-time" id="statusTime">—</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" id="menuToggle">☰</button>
+      <div class="page-title" id="pageTitle">Dashboard Principal</div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-chip" id="deviceChip">
+        <span>ESP32-001</span>
+        <div class="chip-dot" id="chipDot"></div>
+      </div>
+      <div class="topbar-time" id="topbarTime">—</div>
+    </div>
+  </header>
+
+  <!-- ─────────────────── SECCIÓN: DASHBOARD ─────────────────── -->
+  <section class="section active" id="section-dashboard">
+
+    <!-- BANNER DESCONECTADO -->
+    <div class="disconnected-banner" id="disconnectedBanner" style="display:none">
+      <span class="banner-icon">⚠</span>
+      <span>Sensores desconectados — Esperando datos del ESP32...</span>
+      <span class="banner-time" id="bannerTime"></span>
+    </div>
+
+    <!-- SENSOR CARDS -->
+    <div class="cards-grid">
+
+      <div class="sensor-card" id="card-temp">
+        <div class="card-header">
+          <div class="card-icon temp-icon">🌡</div>
+          <div class="card-status-badge" id="badge-temp">—</div>
+        </div>
+        <div class="card-value" id="val-temp">—</div>
+        <div class="card-unit">°C</div>
+        <div class="card-label">Temperatura</div>
+        <div class="card-bar">
+          <div class="card-bar-fill temp-fill" id="bar-temp" style="width:0%"></div>
+        </div>
+        <div class="card-range">0°C ——— 50°C</div>
+      </div>
+
+      <div class="sensor-card" id="card-hum">
+        <div class="card-header">
+          <div class="card-icon hum-icon">💧</div>
+          <div class="card-status-badge" id="badge-hum">—</div>
+        </div>
+        <div class="card-value" id="val-hum">—</div>
+        <div class="card-unit">%</div>
+        <div class="card-label">Humedad</div>
+        <div class="card-bar">
+          <div class="card-bar-fill hum-fill" id="bar-hum" style="width:0%"></div>
+        </div>
+        <div class="card-range">0% ——— 100%</div>
+      </div>
+
+      <div class="sensor-card" id="card-co2">
+        <div class="card-header">
+          <div class="card-icon co2-icon">🌫</div>
+          <div class="card-status-badge" id="badge-co2">—</div>
+        </div>
+        <div class="card-value" id="val-co2">—</div>
+        <div class="card-unit">ppm</div>
+        <div class="card-label">CO₂</div>
+        <div class="card-bar">
+          <div class="card-bar-fill co2-fill" id="bar-co2" style="width:0%"></div>
+        </div>
+        <div class="card-range">0 ——— 2000 ppm</div>
+      </div>
+
+      <div class="sensor-card" id="card-ph">
+        <div class="card-header">
+          <div class="card-icon ph-icon">⚗</div>
+          <div class="card-status-badge" id="badge-ph">—</div>
+        </div>
+        <div class="card-value" id="val-ph">—</div>
+        <div class="card-unit">pH</div>
+        <div class="card-label">Nivel pH</div>
+        <div class="card-bar">
+          <div class="card-bar-fill ph-fill" id="bar-ph" style="width:0%"></div>
+        </div>
+        <div class="card-range">0 ——— 14</div>
+      </div>
+
+    </div><!-- /cards-grid -->
+
+    <!-- STATS 24H -->
+    <div class="stats-section">
+      <div class="stats-header">
+        <h3 class="stats-title">Estadísticas — últimas 24 horas</h3>
+        <div class="stats-badge" id="statsBadge">Cargando...</div>
+      </div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-item" id="stat-temp-prom"><span class="stat-label">Temp. Prom.</span><span class="stat-val">—</span></div>
+        <div class="stat-item" id="stat-temp-max"><span class="stat-label">Temp. Máx.</span><span class="stat-val">—</span></div>
+        <div class="stat-item" id="stat-hum-prom"><span class="stat-label">Hum. Prom.</span><span class="stat-val">—</span></div>
+        <div class="stat-item" id="stat-co2-prom"><span class="stat-label">CO₂ Prom.</span><span class="stat-val">—</span></div>
+        <div class="stat-item" id="stat-ph-prom"><span class="stat-label">pH Prom.</span><span class="stat-val">—</span></div>
+        <div class="stat-item" id="stat-registros"><span class="stat-label">Registros</span><span class="stat-val">—</span></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ─────────────────── SECCIÓN: GRÁFICAS ─────────────────── -->
+  <section class="section" id="section-graficas">
+    <div class="section-header">
+      <h2 class="section-title">Gráficas en Tiempo Real</h2>
+      <div class="section-meta">Actualización cada 3s · Últimos 30 puntos</div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">🌡 Temperatura (°C)</span>
+          <span class="chart-card-current" id="chart-current-temp">—</span>
+        </div>
+          <div class="chart-container">
+            <canvas id="chartTemp"></canvas>
+          </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">💧 Humedad (%)</span>
+          <span class="chart-card-current" id="chart-current-hum">—</span>
+        </div>
+          <div class="chart-container">
+            <canvas id="chartHum"></canvas>
+          </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">🌫 CO₂ (ppm)</span>
+          <span class="chart-card-current" id="chart-current-co2">—</span>
+        </div>
+          <div class="chart-container">
+            <canvas id="chartCO2"></canvas>
+          </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <span class="chart-card-title">⚗ pH</span>
+          <span class="chart-card-current" id="chart-current-ph">—</span>
+        </div>
+          <div class="chart-container">
+            <canvas id="chartPH"></canvas>
+          </dvi>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── SECCIÓN: CALCULADORA ─────────────────── -->
+  <section class="section" id="section-calculadora">
+    <div class="section-header">
+      <h2 class="section-title">Calculadora Ambiental</h2>
+      <div class="section-meta">Evaluación de condiciones ambientales</div>
+    </div>
+
+    <div class="calc-layout">
+      <div class="calc-panel">
+        <div class="calc-mode-toggle">
+          <button class="calc-mode-btn active" id="btnModoManual" onclick="setCalcMode('manual')">Manual</button>
+          <button class="calc-mode-btn" id="btnModoAuto" onclick="setCalcMode('auto')">Automático (sensores)</button>
+        </div>
+
+        <div class="calc-form" id="calcForm">
+          <div class="calc-field">
+            <label class="calc-label">Temperatura (°C)</label>
+            <input type="number" class="calc-input" id="inputTemp" placeholder="Ej: 25" step="0.1" min="-10" max="60">
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">Humedad (%)</label>
+            <input type="number" class="calc-input" id="inputHum" placeholder="Ej: 65" step="1" min="0" max="100">
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">CO₂ (ppm)</label>
+            <input type="number" class="calc-input" id="inputCO2" placeholder="Ej: 420" step="1" min="0" max="5000">
+          </div>
+          <div class="calc-field">
+            <label class="calc-label">pH</label>
+            <input type="number" class="calc-input" id="inputPH" placeholder="Ej: 7.0" step="0.1" min="0" max="14">
+          </div>
+          <button class="calc-btn" onclick="calcularAmbiental()">Calcular Estado Ambiental</button>
+        </div>
+      </div>
+
+      <div class="calc-results" id="calcResults">
+        <div class="result-placeholder">
+          <div class="placeholder-icon">◆</div>
+          <p>Ingresa los valores y presiona<br>Calcular para ver el análisis</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── SECCIÓN: VISTA 3D ─────────────────── -->
+  <section class="section" id="section-vista3d">
+    <div class="section-header">
+      <h2 class="section-title">Vista 3D — Pérgola Interactiva</h2>
+      <div class="section-meta">Haz click en los sensores para ver valores · Arrastra para rotar</div>
+    </div>
+
+    <div class="threejs-layout">
+      <div class="threejs-container">
+        <canvas id="canvasThree"></canvas>
+        <div class="threejs-controls">
+          <span>🖱 Arrastra → rotar</span>
+          <span>🖱 Scroll → zoom</span>
+          <span>👆 Click sensor → info</span>
+        </div>
+      </div>
+
+      <div class="sensor-tooltip" id="sensorTooltip" style="display:none">
+        <div class="tooltip-header" id="tooltipHeader">Sensor</div>
+        <div class="tooltip-value" id="tooltipValue">—</div>
+        <div class="tooltip-status" id="tooltipStatus">—</div>
+        <button class="tooltip-close" onclick="closeSensorTooltip()">✕</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────────── SECCIÓN: MAPA ─────────────────── -->
+  <section class="section" id="section-mapa">
+    <div class="section-header">
+      <h2 class="section-title">Ubicación de la Pérgola</h2>
+      <div class="section-meta">Monitoreo en campo real</div>
+    </div>
+
+    <div class="map-layout">
+      <div id="mapContainer"></div>
+      <div class="map-info-panel">
+        <div class="map-info-title">📍 Información de Ubicación</div>
+        <div class="map-info-row"><span>Nombre:</span><span>Pérgola Inteligente</span></div>
+        <div class="map-info-row"><span>Latitud:</span><span id="mapLat">8.098683° N</span></div>
+        <div class="map-info-row"><span>Longitud:</span><span id="mapLng">-76.708912° O</span></div>
+        <div class="map-info-row"><span>Ciudad:</span><span>Turbo, Antioquia, Colombia</span></div>
+        <div class="map-info-row"><span>Estado:</span><span id="mapEstado" class="status-online">Activa</span></div>
+        <div class="map-separator"></div>
+        <div class="map-info-title">📡 Datos en Sitio</div>
+        <div class="map-info-row"><span>Temperatura:</span><span id="mapTemp">—</span></div>
+        <div class="map-info-row"><span>Humedad:</span><span id="mapHum">—</span></div>
+        <div class="map-info-row"><span>CO₂:</span><span id="mapCO2">—</span></div>
+        <div class="map-info-row"><span>pH:</span><span id="mapPH">—</span></div>
+      </div>
+    </div>
+  </section>
+
+</main><!-- /main-content -->
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/three-scene.js"></script>
+<script src="js/calculator.js"></script>
+<script src="js/map.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
