@@ -8,16 +8,18 @@ const TIMEOUT_DESCONEXION = 15000; // 15 segundos
 // POST /api/sensor-data — recibe datos del ESP32
 const recibirDatos = async (req, res) => {
   try {
-    const { temperatura, humedad, co2, ph, timestamp, dispositivo } = req.body;
+    const { temperatura, co2, ph, timestamp, dispositivo } = req.body;
 
-    // Validación básica
-    if (temperatura === undefined || humedad === undefined || co2 === undefined || ph === undefined) {
-      return res.status(400).json({ error: 'Faltan campos requeridos: temperatura, humedad, co2, ph' });
+// Validación básica (SIN humedad)
+    if (temperatura === undefined || co2 === undefined || ph === undefined) {
+      return res.status(400).json({
+        error: 'Faltan campos requeridos: temperatura, co2, ph'
+      });
     }
 
     const nuevoDato = new SensorData({
       temperatura: parseFloat(temperatura),
-      humedad: parseFloat(humedad),
+      humedad: 0, // valor por defecto
       co2: parseFloat(co2),
       ph: parseFloat(ph),
       timestamp: timestamp ? new Date(timestamp) : new Date(),
@@ -30,7 +32,7 @@ const recibirDatos = async (req, res) => {
     ultimoDato = nuevoDato;
     ultimoTimestamp = Date.now();
 
-    console.log(`📡 Datos recibidos: T=${temperatura}°C H=${humedad}% CO2=${co2}ppm pH=${ph}`);
+    console.log(`📡 Datos recibidos: T=${temperatura}°C CO2=${co2}ppm pH=${ph}`);
 
     res.status(201).json({
       success: true,
